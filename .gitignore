@@ -1,0 +1,5 @@
+bvenv/
+__pycache__/
+*.pyc
+dataset/
+static/uploaded.jpg

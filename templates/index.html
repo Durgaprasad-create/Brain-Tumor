@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroScan AI | Brain Tumor Detection</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Poppins", sans-serif;
+        background-color: #f4f7fb;
+        color: #1f2d3d;
+      }
+
+      .header {
+        background: #0a1f44;
+        padding: 20px 40px;
+        color: white;
+        font-size: 22px;
+        font-weight: 600;
+      }
+
+      .dashboard {
+        display: flex;
+        padding: 40px;
+        gap: 30px;
+      }
+
+      .card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        flex: 1;
+      }
+
+      button {
+        background: #1b6ef3;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      button:hover {
+        background: #155ac4;
+      }
+      button:disabled {
+        opacity: 0.6;
+      }
+
+      .preview-img {
+        display: none;
+        margin-top: 20px;
+        max-width: 100%;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+      }
+
+      .result-box {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 10px;
+        background: #eef4ff;
+        border-left: 5px solid #1b6ef3;
+      }
+
+      .metric {
+        font-size: 14px;
+        margin-top: 6px;
+        color: #444;
+      }
+
+      .loader {
+        display: none;
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .spinner {
+        margin: 0 auto 10px auto;
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e0e0e0;
+        border-top: 4px solid #1b6ef3;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-text {
+        font-size: 14px;
+        color: #1b6ef3;
+        font-weight: 500;
+      }
+
+      .footer {
+        text-align: center;
+        padding: 20px;
+        font-size: 12px;
+        color: #6b7c93;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header">NeuroScan AI — Brain Tumor Analysis System</div>
+
+    <div class="dashboard">
+      <!-- LEFT PANEL -->
+      <div class="card">
+        <h2>Upload MRI Scan</h2>
+        <p>Select a brain MRI image for AI-based tumor detection.</p>
+
+        <form
+          method="POST"
+          enctype="multipart/form-data"
+          onsubmit="showLoader()"
+        >
+          <input
+            type="file"
+            name="mri"
+            accept="image/*"
+            required
+            onchange="previewImage(event)"
+          />
+          <br /><br />
+          <button type="submit" id="detectBtn">Analyze Scan</button>
+        </form>
+
+        <div class="loader" id="loadingText">
+          <div class="spinner"></div>
+          <div class="loading-text">
+            <span id="loadingMessage">Analyzing MRI...</span>
+          </div>
+        </div>
+
+        <img id="preview" class="preview-img" alt="MRI Preview" />
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="card">
+        <h2>Prediction Result</h2>
+
+        {% if result %}
+        <div class="result-box">
+          <h3>{{ result }}</h3>
+
+          {% if confidence %}
+          <div class="metric">Confidence Score: {{ confidence }}%</div>
+          {% endif %} {% if model_accuracy %}
+          <div class="metric">Model Accuracy: {{ model_accuracy }}%</div>
+          {% endif %}
+
+          <div class="metric">{{ suggestion }}</div>
+        </div>
+        {% else %}
+        <p style="color: #888">Upload an MRI scan to see analysis results.</p>
+        {% endif %}
+
+        <hr style="margin: 30px 0" />
+
+        <h3>Model Information</h3>
+        <ul style="padding-left: 18px; color: #555">
+          <li>Algorithm: Logistic Regression</li>
+          <li>Input Size: 64 × 64 Grayscale</li>
+          <li>Type: Binary Classification</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      ⚠ This system is intended for research and educational purposes only.
+    </div>
+
+    <script>
+      function previewImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function () {
+          const output = document.getElementById("preview");
+          output.src = reader.result;
+          output.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function showLoader() {
+        document.getElementById("loadingText").style.display = "block";
+        document.getElementById("detectBtn").disabled = true;
+
+        // Simulated analysis stages
+        const messages = [
+          "Uploading MRI...",
+          "Preprocessing Image...",
+          "Running AI Model...",
+          "Generating Prediction...",
+        ];
+
+        let index = 0;
+        const messageElement = document.getElementById("loadingMessage");
+
+        const interval = setInterval(() => {
+          index++;
+          if (index < messages.length) {
+            messageElement.textContent = messages[index];
+          } else {
+            clearInterval(interval);
+          }
+        }, 600);
+      }
+    </script>
+  </body>
+</html>
